@@ -1,4 +1,5 @@
 // ELEMENTOS DEL DOM
+
 const table = document.getElementById("tablaPosiciones").getElementsByTagName("tbody")[0];
 const form = document.getElementById("registroForm");
 const dateMatch = document.getElementById("dateMatch");
@@ -10,6 +11,8 @@ const equipo2 = document.getElementById("equipo2");
 let tournamentData = loadFromLocalStorage(); // Cargar datos previos si existen
 let fechaActiva="Ninguna"; //Inicializar fecha activa
 let partidosPorFecha = {}; //Inicializar objeto para almacenar los partidos por fecha
+
+//----------------------------------------------------------------------------------------//
 
 // MANEJADOR DEL EVENTO SUBMIT DEL FORMULARIO
 
@@ -54,6 +57,8 @@ function manejadorEnvioFormulario(event) {
     }
 }
 
+//----------------------------------------------------------------------------------------//
+
 //FUNCIÓN PARA REGISTRAR EL PARTIDO SI ES VÁLIDO
 
 function registrarPartido() {
@@ -85,11 +90,23 @@ function saveToLocalStorage(data) {
     localStorage.setItem("tournamentData", JSON.stringify(data));
 }
 
+//----------------------------------------------------------------------------------------//
+
 // FUNCIÓN PARA CARGAR LOS DATOS DESDE LOCALSTORAGE
 function loadFromLocalStorage() {
     const data = localStorage.getItem("tournamentData");
-    return data ? JSON.parse(data) : [];
+    return data ? JSON.parse(data) : []; //Retorna un arreglo vacío si no hay datos en LocalStorage
 }
+
+//----------------------------------------------------------------------------------------//
+
+//INICIALIZAR LOS DATOS Y EVENTOS EN LA CARGA DE LA PÁGINA
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("setFechaActivaBtn").addEventListener("click", setFechaActiva);
+    actualizarPosicionTabla(); // Actualiza la tabla de posiciones con los datos de LocalStorage
+});
+
+//----------------------------------------------------------------------------------------//
 
 // FUNCÓN PARA ACTUALIZAR LA TABLA DE POSICIONES
 
@@ -163,7 +180,11 @@ function actualizarPosicionTabla() {
     });
 }
 
+
+//----------------------------------------------------------------------------------------//
+
 // FUNCIÓN PARA ELIMINAR UN EQUIPO
+
 function removeEquipo(nombreEquipo) {
     let tournamentData = loadFromLocalStorage();
     tournamentData = tournamentData.filter(
@@ -173,37 +194,53 @@ function removeEquipo(nombreEquipo) {
     actualizarPosicionTabla();
 }
 
-// FUNCIÓN PARA EDITAR UN EQUIPO
+//----------------------------------------------------------------------------------------//
+
+// FUNCIÓN PARA EDITAR UN EQUIPO Y SU PARTIDO COMPLETO
 function editarEquipo(nombreEquipo) {
-    const nuevoNombre = prompt("Ingrese el nuevo nombre para el equipo:", nombreEquipo);
-    if (nuevoNombre && nuevoNombre !== nombreEquipo) {
-        let tournamentData = loadFromLocalStorage();
-        tournamentData = tournamentData.map(match => {
-            match.equipos = match.equipos.map(equipo => {
-                if (equipo.nombre === nombreEquipo) {
-                    return { ...equipo, nombre: nuevoNombre };
-                }
-                return equipo;
-            });
-            return match;
-        });
+    let tournamentData = loadFromLocalStorage();
+
+    // Buscar el partido del equipo a editar
+    const partidoAEditar = tournamentData.find(match => 
+        match.equipos.some(equipo => equipo.nombre === nombreEquipo)
+    );
+
+    if (partidoAEditar) {
+        const equipo1 = partidoAEditar.equipos[0];
+        const equipo2 = partidoAEditar.equipos[1];
+
+        // Obtener nuevos valores a través de prompts
+        const nuevoNombreEquipo1 = prompt("Ingrese el nuevo nombre para el equipo local:", equipo1.nombre) || equipo1.nombre;
+        const nuevosGolesEquipo1 = parseInt(prompt("Ingrese los nuevos goles para el equipo local:", equipo1.goles), 10) || equipo1.goles;
+        
+        const nuevoNombreEquipo2 = prompt("Ingrese el nuevo nombre para el equipo visitante:", equipo2.nombre) || equipo2.nombre;
+        const nuevosGolesEquipo2 = parseInt(prompt("Ingrese los nuevos goles para el equipo visitante:", equipo2.goles), 10) || equipo2.goles;
+        
+        const nuevaFecha = prompt("Ingrese la nueva fecha para el partido:", partidoAEditar.fecha) || partidoAEditar.fecha;
+
+        // Actualizar los valores del partido
+        partidoAEditar.equipos[0].nombre = nuevoNombreEquipo1;
+        partidoAEditar.equipos[0].goles = nuevosGolesEquipo1;
+        
+        partidoAEditar.equipos[1].nombre = nuevoNombreEquipo2;
+        partidoAEditar.equipos[1].goles = nuevosGolesEquipo2;
+        
+        partidoAEditar.fecha = nuevaFecha;
+
+        // Guardar los cambios en el almacenamiento local
         saveToLocalStorage(tournamentData);
+
+        // Actualizar la tabla de posiciones
         actualizarPosicionTabla();
+    } else {
+        alert("No se encontró el equipo para editar.");
     }
 }
 
-// CARGAR LOS DATOS AL CARGAR LA PÁGINA
-function cargarPosicionesFromLocalStorage() {
-    actualizarPosicionTabla();
-}
-
-//INICIALIZAR LOS DATOS Y EVENTOS EN LA CARGA DE LA PÁGINA
-document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("setFechaActivaBtn").addEventListener("click", setFechaActiva);
-    actualizarPosicionTabla();
-});
+//----------------------------------------------------------------------------------------//
 
 // FUNCIÓN PARA VALIDAR EL FORMULARIO ANTES DE REGISTRAR EL PARTIDO
+
 function validarFormulario() {
     const fecha = fechaActiva;
     const equipoLocal = equipo1.value.trim();
@@ -245,11 +282,7 @@ function validarFormulario() {
     return true;
 }
 
-//CARGAR LA TABLA DE POSICIONES DESDE EL LOCALSTORAGE CUANDO SE CARGA LA PÁGINA
-document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("setFechaActivaBtn").addEventListener("click", setFechaActiva);
-    actualizarPosicionTabla();
-});
+//----------------------------------------------------------------------------------------//
 
 //FUNCIÓN PARA ESTABLECER LA FECHA DISPUTADA ACTIVA
 
@@ -268,6 +301,9 @@ function setFechaActiva() {
         alert("Por favor, ingresa una fecha válida.");
     }
 }
+
+
+
 
 
 
