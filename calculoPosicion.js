@@ -30,7 +30,6 @@ function manejadorEnvioFormulario(event) {
         // Capturamos los datos del partido
         const equipoLocal = equipo1.value;
         const equipoVisitante = equipo2.value;
-        const fecha = dateMatch.value;
         const golesLocal = parseInt(score1.value);
         const golesVisitante = parseInt(score2.value);
 
@@ -50,7 +49,7 @@ function manejadorEnvioFormulario(event) {
 
         // Actualizamos la tabla de posiciones y mostramos el nuevo partido
         actualizarPosicionTabla();
-        agregarPartidoToTable(partido);
+        
 
         // Limpiamos el formulario
         form.reset();
@@ -85,6 +84,8 @@ function registrarPartido() {
     agregarPartidoToTable(partido);
 }
 
+//----------------------------------------------------------------------------------------//
+
 // FUNCIÓN PARA GUARDAR EL ARREGLO EN EL ALMACENAMIENTO LOCAL
 function saveToLocalStorage(data) {
     localStorage.setItem("tournamentData", JSON.stringify(data));
@@ -102,9 +103,13 @@ function loadFromLocalStorage() {
 
 //INICIALIZAR LOS DATOS Y EVENTOS EN LA CARGA DE LA PÁGINA
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("setFechaActivaBtn").addEventListener("click", setFechaActiva);
+    const setFechaActivaBtn = document.getElementById("setFechaActivaBtn");
+    if (setFechaActivaBtn) {
+        setFechaActivaBtn.addEventListener("click", setFechaActiva);
+    }
     actualizarPosicionTabla(); // Actualiza la tabla de posiciones con los datos de LocalStorage
 });
+
 
 //----------------------------------------------------------------------------------------//
 
@@ -180,7 +185,6 @@ function actualizarPosicionTabla() {
     });
 }
 
-
 //----------------------------------------------------------------------------------------//
 
 // FUNCIÓN PARA ELIMINAR UN EQUIPO
@@ -196,45 +200,45 @@ function removeEquipo(nombreEquipo) {
 
 //----------------------------------------------------------------------------------------//
 
-// FUNCIÓN PARA EDITAR UN EQUIPO Y SU PARTIDO COMPLETO
-function editarEquipo(nombreEquipo) {
+// FUNCIÓN PARA EDITAR EL ÚLTIMO PARTIDO INGRESADO
+function editarEquipo() {
     let tournamentData = loadFromLocalStorage();
 
-    // Buscar el partido del equipo a editar
-    const partidoAEditar = tournamentData.find(match => 
-        match.equipos.some(equipo => equipo.nombre === nombreEquipo)
-    );
-
-    if (partidoAEditar) {
-        const equipo1 = partidoAEditar.equipos[0];
-        const equipo2 = partidoAEditar.equipos[1];
-
-        // Obtener nuevos valores a través de prompts
-        const nuevoNombreEquipo1 = prompt("Ingrese el nuevo nombre para el equipo local:", equipo1.nombre) || equipo1.nombre;
-        const nuevosGolesEquipo1 = parseInt(prompt("Ingrese los nuevos goles para el equipo local:", equipo1.goles), 10) || equipo1.goles;
-        
-        const nuevoNombreEquipo2 = prompt("Ingrese el nuevo nombre para el equipo visitante:", equipo2.nombre) || equipo2.nombre;
-        const nuevosGolesEquipo2 = parseInt(prompt("Ingrese los nuevos goles para el equipo visitante:", equipo2.goles), 10) || equipo2.goles;
-        
-        const nuevaFecha = prompt("Ingrese la nueva fecha para el partido:", partidoAEditar.fecha) || partidoAEditar.fecha;
-
-        // Actualizar los valores del partido
-        partidoAEditar.equipos[0].nombre = nuevoNombreEquipo1;
-        partidoAEditar.equipos[0].goles = nuevosGolesEquipo1;
-        
-        partidoAEditar.equipos[1].nombre = nuevoNombreEquipo2;
-        partidoAEditar.equipos[1].goles = nuevosGolesEquipo2;
-        
-        partidoAEditar.fecha = nuevaFecha;
-
-        // Guardar los cambios en el almacenamiento local
-        saveToLocalStorage(tournamentData);
-
-        // Actualizar la tabla de posiciones
-        actualizarPosicionTabla();
-    } else {
-        alert("No se encontró el equipo para editar.");
+    // Verificar si hay partidos registrados
+    if (tournamentData.length === 0) {
+        alert("No hay partidos registrados para editar.");
+        return;
     }
+
+    // Obtener el último partido ingresado
+    const partidoAEditar = tournamentData[tournamentData.length - 1];
+
+    const equipo1 = partidoAEditar.equipos[0];
+    const equipo2 = partidoAEditar.equipos[1];
+
+    // Obtener nuevos valores a través de prompts
+    const nuevoNombreEquipo1 = prompt("Ingrese el nuevo nombre para el equipo local:", equipo1.nombre) || equipo1.nombre;
+    const nuevosGolesEquipo1 = parseInt(prompt("Ingrese los nuevos goles para el equipo local:", equipo1.goles), 10) || equipo1.goles;
+    
+    const nuevoNombreEquipo2 = prompt("Ingrese el nuevo nombre para el equipo visitante:", equipo2.nombre) || equipo2.nombre;
+    const nuevosGolesEquipo2 = parseInt(prompt("Ingrese los nuevos goles para el equipo visitante:", equipo2.goles), 10) || equipo2.goles;
+    
+    const nuevaFecha = prompt("Ingrese la nueva fecha para el partido:", partidoAEditar.fecha) || partidoAEditar.fecha;
+
+    // Actualizar los valores del partido
+    partidoAEditar.equipos[0].nombre = nuevoNombreEquipo1;
+    partidoAEditar.equipos[0].goles = nuevosGolesEquipo1;
+    
+    partidoAEditar.equipos[1].nombre = nuevoNombreEquipo2;
+    partidoAEditar.equipos[1].goles = nuevosGolesEquipo2;
+    
+    partidoAEditar.fecha = nuevaFecha;
+
+    // Guardar los cambios en el almacenamiento local
+    saveToLocalStorage(tournamentData);
+
+    // Actualizar la tabla de posiciones
+    actualizarPosicionTabla();
 }
 
 //----------------------------------------------------------------------------------------//
@@ -301,6 +305,10 @@ function setFechaActiva() {
         alert("Por favor, ingresa una fecha válida.");
     }
 }
+
+
+
+
 
 
 
