@@ -110,7 +110,6 @@ document.addEventListener("DOMContentLoaded", function() {
     actualizarPosicionTabla(); // Actualiza la tabla de posiciones con los datos de LocalStorage
 });
 
-
 //----------------------------------------------------------------------------------------//
 
 // FUNCÓN PARA ACTUALIZAR LA TABLA DE POSICIONES
@@ -124,28 +123,34 @@ function actualizarPosicionTabla() {
         const equipo1 = match.equipos[0];
         const equipo2 = match.equipos[1];
 
-        // Inicializar equipos si no existen
-        if (!equipos[equipo1.nombre]) {
-            equipos[equipo1.nombre] = { puntos: 0, gaf: 0, gec: 0 };
-        }
-        if (!equipos[equipo2.nombre]) {
-            equipos[equipo2.nombre] = { puntos: 0, gaf: 0, gec: 0 };
-        }
+        // Normalizar los nombres de los equipos
+        const nombreEquipo1 = equipo1.nombre.trim().toLowerCase();
+        const nombreEquipo2 = equipo2.nombre.trim().toLowerCase();
 
+        // Inicializar equipos si no existen, conservando el nombre original para mostrarlo
+
+        if (!equipos[nombreEquipo1]) {
+            equipos[nombreEquipo1] = { nombre: equipo1.nombre, puntos: 0, gaf: 0, gec: 0 };
+
+        }
+        if (!equipos[nombreEquipo2]) {
+            equipos[nombreEquipo2] = { nombre: equipo2.nombre, puntos: 0, gaf: 0, gec: 0 };
+        }
+        
         // Calcular GAF y GEC
-        equipos[equipo1.nombre].gaf += equipo1.goles;
-        equipos[equipo1.nombre].gec += equipo2.goles;
-        equipos[equipo2.nombre].gaf += equipo2.goles;
-        equipos[equipo2.nombre].gec += equipo1.goles;
+        equipos[nombreEquipo1].gaf += equipo1.goles;
+        equipos[nombreEquipo1].gec += equipo2.goles;
+        equipos[nombreEquipo2].gaf += equipo2.goles;
+        equipos[nombreEquipo2].gec += equipo1.goles;
 
         // Asignar puntos según los goles
         if (equipo1.goles > equipo2.goles) {
-            equipos[equipo1.nombre].puntos += 3;
+            equipos[nombreEquipo1].puntos += 3;
         } else if (equipo1.goles < equipo2.goles) {
-            equipos[equipo2.nombre].puntos += 3;
+            equipos[nombreEquipo2].puntos += 3;
         } else {
-            equipos[equipo1.nombre].puntos += 1;
-            equipos[equipo2.nombre].puntos += 1;
+            equipos[nombreEquipo1].puntos += 1;
+            equipos[nombreEquipo2].puntos += 1;
         }
     });
 
@@ -222,8 +227,6 @@ function editarEquipo() {
     
     const nuevoNombreEquipo2 = prompt("Ingrese el nuevo nombre para el equipo visitante:", equipo2.nombre) || equipo2.nombre;
     const nuevosGolesEquipo2 = parseInt(prompt("Ingrese los nuevos goles para el equipo visitante:", equipo2.goles), 10) || equipo2.goles;
-    
-    const nuevaFecha = prompt("Ingrese la nueva fecha para el partido:", partidoAEditar.fecha) || partidoAEditar.fecha;
 
     // Actualizar los valores del partido
     partidoAEditar.equipos[0].nombre = nuevoNombreEquipo1;
@@ -231,8 +234,6 @@ function editarEquipo() {
     
     partidoAEditar.equipos[1].nombre = nuevoNombreEquipo2;
     partidoAEditar.equipos[1].goles = nuevosGolesEquipo2;
-    
-    partidoAEditar.fecha = nuevaFecha;
 
     // Guardar los cambios en el almacenamiento local
     saveToLocalStorage(tournamentData);

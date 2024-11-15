@@ -122,14 +122,6 @@ label {
 }
 
 
-body {
-    background-image: url('/futbol.avif');
-    background-size: cover; /* Cubre toda la página */
-    background-position: center;
-    background-attachment: fixed; /* Fijo la imagen cuando se hace scroll */
-    font-family: Arial, sans-serif;
-    color: #333;
-}
 
 
 
