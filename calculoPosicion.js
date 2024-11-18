@@ -58,34 +58,6 @@ function manejadorEnvioFormulario(event) {
 
 //----------------------------------------------------------------------------------------//
 
-//FUNCIÓN PARA REGISTRAR EL PARTIDO SI ES VÁLIDO
-
-function registrarPartido() {
-    const equipoLocal = equipo1.value.trim();
-    const equipoVisitante = equipo2.value.trim();
-    const fecha = dateMatch.value.trim();
-    const golesLocal = parseInt(score1.value, 10);
-    const golesVisitante = parseInt(score2.value, 10);
-
-    // Crear el objeto partido
-    const partido = {
-        equipos: [
-            { nombre: equipoLocal, goles: golesLocal },
-            { nombre: equipoVisitante, goles: golesVisitante }
-        ],
-        fecha
-    };
-
-    // Guardar el partido en la lista de partidos del torneo
-    tournamentData.push(partido);
-    saveToLocalStorage(tournamentData);
-
-    // Añadir el partido a la tabla de partidos
-    agregarPartidoToTable(partido);
-}
-
-//----------------------------------------------------------------------------------------//
-
 // FUNCIÓN PARA GUARDAR EL ARREGLO EN EL ALMACENAMIENTO LOCAL
 function saveToLocalStorage(data) {
     localStorage.setItem("tournamentData", JSON.stringify(data));
@@ -192,16 +164,21 @@ function actualizarPosicionTabla() {
 
 //----------------------------------------------------------------------------------------//
 
-// FUNCIÓN PARA ELIMINAR UN EQUIPO
+//FUNCIÓN PARA ELIMINAR UN EQUIPO
 
 function removeEquipo(nombreEquipo) {
+    const equipoNormalizado = nombreEquipo.trim().toLowerCase();
+
+    // Filtrar los partidos que no contengan el equipo a eliminar
     let tournamentData = loadFromLocalStorage();
     tournamentData = tournamentData.filter(
-        match => !match.equipos.some(e => e.nombre === nombreEquipo)
+        match => !match.equipos.some(e => e.nombre.trim().toLowerCase() === equipoNormalizado)
     );
+
     saveToLocalStorage(tournamentData);
     actualizarPosicionTabla();
 }
+
 
 //----------------------------------------------------------------------------------------//
 
